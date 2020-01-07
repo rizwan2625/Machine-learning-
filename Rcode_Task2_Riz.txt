@@ -1,0 +1,92 @@
+#######     MACHINE LEARNING: TASK 2     #######
+
+library(bnlearn)
+library(gRain)
+library(Rgraphviz)
+library(ggplot2)
+library(reshape)
+library(dplyr)
+library(tidyr)
+library(readxl)
+
+##   LEARNING OF THE DISCRETE BAYESIAN NETWORK FROM THE DATA    ##
+
+setwd("[YOUR WORKING DIRECTORY]") # REMEMBER TO SET YOUR WORKING DIRECTORY!!!
+
+dataset <- read_excel("dataset.xlsx")
+View(dataset)
+anyNA(dataset) # to check if there are 'NA' in the data set
+apply(dataset, 2, factor)
+dataset <- dataset %>% mutate_if(is.character,as.factor) # to transform all variables to factors
+dataset<-as.data.frame(dataset)
+dataset<-dataset[,3:25] # I would recommend you to remove the first two variables (id and t)
+summary(dataset) # to get a summary of the variables
+
+# model 1 (SCORE BASED MODEL): hill-climbing, with 10 random restarts and 5 perturbed arcs in the new starting
+
+model1 = hc(dataset, score = "bic", restart = 10, perturb = 5, debug = TRUE) # using the BIC score
+model1 # to inspect the characteristics of the model
+nnodes(model1) # number of nodes 23
+narcs(model1) # number of arcs    30
+root.nodes(model1) # to identify the root nodes   ( "Gender" "REVcat" "ACTds")
+leaf.nodes(model1) # to identify the leaf nodes
+vstructs(model1) # v-structures
+sapply(nodes(model1), function(node) mb(model1, node = node)) # to get the Markov blankets for all nodes
+all.equal(cpdag(model1), model1) # to check if our DAG is a CPDAG
+
+BN1 = bn.fit(model1, dataset, method = "mle") # ML  parameter  estimation
+BN1 # to inspect the conditional probability tables (CPTs)
+nparams(BN1) # to check the number of parameters of the BN1
+
+pp = graphviz.plot(BN1, layout="fdp")
+nodeRenderInfo(pp) = list(fontsize = 40) # change the fontsize to make the letters in the graph smaller or bigger!!
+renderGraph(pp)
+
+# barplots for the CPT data (just a few examples... try yourself!!)
+bn.fit.barchart(BN1$`Asthma exacerbation`)
+bn.fit.barchart(BN1$Eczema)
+bn.fit.barchart(BN1$Rhinitis)
+
+# model 2: "tabu" method
+model2 = tabu(dataset, score = "bic", tabu = 10, max.tabu = 5, debug = TRUE)
+model2 # to inspect the characteristics of the model
+nnodes(model2) # number of nodes
+narcs(model2) # number of arcs
+root.nodes(model2) # to identify the root nodes
+leaf.nodes(model2) # to identify the leaf nodes
+vstructs(model2) # v-structures
+sapply(nodes(model2), function(node) mb(model2, node = node)) # to get the Markov blankets for all nodes
+all.equal(cpdag(model2), model2) # to check if our DAG is a CPDAG
+
+BN2 = bn.fit(model2, dataset, method = "mle") # ML  parameter  estimation
+BN2 # to inspect the conditional probability tables (CPTs)
+nparams(BN2) # to check the number of parameters of the BN2
+
+pp = graphviz.plot(BN2, layout="fdp")
+nodeRenderInfo(pp) = list(fontsize = 40) # change the fontsize to make the letters in the graph smaller or bigger!!
+renderGraph(pp)
+
+# barplots for the CPT data (just a few examples... again, try yourself!!)
+bn.fit.barchart(BN2$`Asthma exacerbation`)
+bn.fit.barchart(BN2$Eczema)
+bn.fit.barchart(BN2$Rhinitis)
+
+# comparison of the two models
+unlist(compare(model1, model2)) # comparison of the DAGs (output: true positives, false positives, etc.)
+unlist(compare(cpdag(model1), cpdag(model2))) # comparison of the CPDAGs
+all.equal(model1, model2)
+hamming(model1, model2) # Hamming distance
+shd(model1, model2) # Structural Hamming distance
+
+
+#### EXACT INFERENCE
+
+junction1 = compile(as.grain(BN1)) # to convert the BNs into a gRain object and build the junction tree that will be used for inference
+junction2 = compile(as.grain(BN2))
+
+junction1$rip$cliques # to get all the cliques of the compiled networks
+junction2$rip$cliques # to get all the cliques of the compiled network
+
+junction1$rip$separators # to get all the separators of the compiled network
+junction2$rip$separators # to get all the separators of the compiled network
+
