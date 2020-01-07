@@ -1,0 +1,89 @@
+> model1 # to inspect the characteristics of the model
+
+  Bayesian network learned via Score-based methods
+
+  model:
+   [Gender][REVcat][ACTds][agecat|REVcat][FEV1cat|REVcat][ACTda|ACTds][Asthma exacerbation|REVcat:ACTda][Breastfeed|agecat][Rhinitis|agecat][Foodalle|FEV1cat][ACTcat|ACTda][Dyspnea|ACTda][Eczema|Foodalle][FVCcat|Rhinitis:FEV1cat][ataq|ACTcat][bmicat|Rhinitis:Eczema][Bronch|Gender:Eczema][NocSym|ataq][Animalshom|agecat:Bronch][Smokingpre|Bronch:Animalshom][Asthmacat|Rhinitis:Bronch:Animalshom][Ath|Animalshom][Drugsalle|Gender:Smokingpre:Asthmacat] 
+  nodes:                                 23 
+  arcs:                                  30 
+    undirected arcs:                     0 
+    directed arcs:                       30 
+  average markov blanket size:           3.48 
+  average neighbourhood size:            2.61 
+  average branching factor:              1.30 
+
+  learning algorithm:                    Hill-Climbing 
+  score:                                 BIC (disc.) 
+  penalization coefficient:              2.6365 
+  tests used in the learning procedure:  3456 
+  optimized:                             TRUE 
+............................................
+leaf.nodes 
+[1] "Asthma exacerbation"
+[2] "bmicat"             
+[3] "Breastfeed"         
+[4] "Drugsalle"          
+[5] "Ath"                
+[6] "FVCcat"             
+[7] "NocSym"             
+[8] "Dyspnea"
+............................................
+Model two
+* maximum number of iterations without improvements reached, stopping.
+* best network ever seen is:
+
+  Bayesian network learned via Score-based methods
+
+  model:
+   [Gender][FEV1cat][ACTds][Foodalle|FEV1cat][REVcat|FEV1cat][ACTda|ACTds][Asthma exacerbation|REVcat:ACTda][agecat|REVcat][Eczema|Foodalle][ACTcat|ACTda][Dyspnea|ACTda][Breastfeed|agecat][Rhinitis|agecat][Bronch|Gender:Eczema][ataq|ACTcat][bmicat|Rhinitis:Eczema][Animalshom|agecat:Bronch][FVCcat|Rhinitis:FEV1cat][NocSym|ataq][Smokingpre|Bronch:Animalshom][Asthmacat|Rhinitis:Bronch:Animalshom][Ath|Animalshom][Drugsalle|Gender:Smokingpre:Asthmacat] 
+  nodes:                                 23 
+  arcs:                                  30 
+    undirected arcs:                     0 
+    directed arcs:                       30 
+  average markov blanket size:           3.48 
+  average neighbourhood size:            2.61 
+  average branching factor:              1.30 
+
+  learning algorithm:                    Tabu Search 
+  score:                                 BIC (disc.) 
+  penalization coefficient:              2.6365 
+  tests used in the learning procedure:  934 
+  optimized:                             TRUE 
+ Bayesian network learned via Score-based methods
+
+  model:
+   [Gender][FEV1cat][ACTds][Foodalle|FEV1cat][REVcat|FEV1cat][ACTda|ACTds][Asthma exacerbation|REVcat:ACTda][agecat|REVcat][Eczema|Foodalle][ACTcat|ACTda][Dyspnea|ACTda][Breastfeed|agecat][Rhinitis|agecat][Bronch|Gender:Eczema][ataq|ACTcat][bmicat|Rhinitis:Eczema][Animalshom|agecat:Bronch][FVCcat|Rhinitis:FEV1cat][NocSym|ataq][Smokingpre|Bronch:Animalshom][Asthmacat|Rhinitis:Bronch:Animalshom][Ath|Animalshom][Drugsalle|Gender:Smokingpre:Asthmacat] 
+  nodes:                                 23 
+  arcs:                                  30 
+    undirected arcs:                     0 
+    directed arcs:                       30 
+  average markov blanket size:           3.48 
+  average neighbourhood size:            2.61 
+  average branching factor:              1.30 
+
+  learning algorithm:                    Tabu Search 
+  score:                                 BIC (disc.) 
+  penalization coefficient:              2.6365 
+  tests used in the learning procedure:  1388 
+  optimized:                             TRUE 
+........................................................................
+Abbreviations
+ACT	asthma control test
+AIC	Akaike information criterion
+ATAQ	Asthma Therapy Assessment Questionnaire
+BIC	Bayesian information criterion
+BMI	body mass index
+BNC	Bayesian network classifier
+BSEJ	backward sequential elimination and joining
+FEV1	forced expiratory volume in 1 s
+FSSJ	filter forward sequential selection and joining
+FVC	forced vital capacity
+GEE	generalized estimating equations
+HC	hill climbing
+LOGLIK	log-likelihood
+NB	Naive Bayes
+PEF	peak expiratory flow
+ROC	receiver operating characteristics
+SNBC	semi-Naive Bayes classifier
+SVM	support vector machine
+TAN	tree augmented Naive Bayes
