@@ -1,0 +1,75 @@
+﻿
+################################################
+#          UNSUPERVISED CLASSIFICATION         #
+################################################
+
+# Useful links:
+# https://cran.r-project.org/web/packages/mclust/vignettes/mclust.html#mclustda
+# https://bradleyboehmke.github.io/HOML/kmeans.html
+
+library(dplyr)       # for data manipulation
+library(ggplot2)     # for data visualization
+library(stringr)     # for string functionality
+# Modeling packages
+library(cluster)     # for general clustering algorithms
+library(factoextra)  # for visualizing cluster results
+library(mclust)	     # for fitting clustering algorithms
+
+# Import the dataset
+setwd("C:/Users/sergi/Desktop/Riz") # to set your working directory
+lymphography <- read.csv("C:/Users/sergi/Desktop/Riz/lymphography.csv", header=FALSE)
+View(lymphography)
+Data <- lymphography
+class(Data) # to check that it is a data.frame
+dim(Data) # to see the dimensions of the data set
+summary(Data) # to get an overview of the values for your variables
+
+# To tranform the data into factors
+Data$V1<-as.factor(Data$V1)
+Data$V2<-as.factor(Data$V2)
+Data$V3<-as.factor(Data$V3)
+Data$V4<-as.factor(Data$V4)
+Data$V5<-as.factor(Data$V5)
+Data$V6<-as.factor(Data$V6)
+Data$V7<-as.factor(Data$V7)
+Data$V8<-as.factor(Data$V8)
+Data$V9<-as.factor(Data$V9)
+Data$V10<-as.factor(Data$V10)
+Data$V11<-as.factor(Data$V11)
+Data$V12<-as.factor(Data$V12)
+Data$V13<-as.factor(Data$V13)
+Data$V14<-as.factor(Data$V14)
+Data$V15<-as.factor(Data$V15)
+Data$V16<-as.factor(Data$V16)
+Data$V17<-as.factor(Data$V17)
+Data$V18<-as.factor(Data$V18)
+Data$V19<-as.factor(Data$V19)
+
+# Preparation of the data
+V1 <- Data$V1 # to create a list with the labels of each instance
+Data$V1 <- NULL # to remove the class variable!!! (unsupervised classification!!)
+summary(Data)
+
+## HIERARCHICAL CLUSTERING ##
+
+distances <- daisy(Data, metric = "gower")
+hclust_avg <- hclust(distances, method = 'complete')
+plot(hclust_avg)
+cut_avg <- cutree(hclust_avg, k = 4) # let's use k= 4 because you have 4 classes
+
+rect.hclust(hclust_avg , k = 4, border = 2:6)
+
+# Confusion matrix
+tb1 <- table(V1, cut_avg)
+tb1
+
+
+## k-MEANS CLUSTERING ##
+
+# To use k-means model with 4 centers (because you have 4 classes) and 10 random starts
+kmeans <- kmeans(Data, centers = 4, nstart = 10)
+kmeans # this will show on screen all the results
+
+# Confusion matrix
+tb2 <- table(V1, kmeans$cluster) 
+tb2

@@ -1,0 +1,248 @@
+﻿################################################  ASSIGNMENT 1  ################################################
+
+# PRELIMINARY ANALYSES 
+
+# Import the dataset
+setwd("C:/Users/sergi/Desktop/Riz") # to set your working directory
+lymphography <- read.csv("C:/Users/sergi/Desktop/Riz/lymphography.csv", header=FALSE)
+View(lymphography)
+Data <- lymphography
+class(Data) # to check that it is a data.frame
+dim(Data) # to see the dimensions of the data set
+summary(Data) # to get an overview of the values for your variables
+
+# To tranform the data into factors
+Data$V1<-as.factor(Data$V1)
+Data$V2<-as.factor(Data$V2)
+Data$V3<-as.factor(Data$V3)
+Data$V4<-as.factor(Data$V4)
+Data$V5<-as.factor(Data$V5)
+Data$V6<-as.factor(Data$V6)
+Data$V7<-as.factor(Data$V7)
+Data$V8<-as.factor(Data$V8)
+Data$V9<-as.factor(Data$V9)
+Data$V10<-as.factor(Data$V10)
+Data$V11<-as.factor(Data$V11)
+Data$V12<-as.factor(Data$V12)
+Data$V13<-as.factor(Data$V13)
+Data$V14<-as.factor(Data$V14)
+Data$V15<-as.factor(Data$V15)
+Data$V16<-as.factor(Data$V16)
+Data$V17<-as.factor(Data$V17)
+Data$V18<-as.factor(Data$V18)
+Data$V19<-as.factor(Data$V19)
+
+# Open some of the packages that will be needed
+library(mlr)
+library(ggplot2)
+library(GGally)
+
+
+# Create a new task
+task1 = makeClassifTask(id = "lymphography", data = Data, target = "V1") # class variable: "Condition"
+task1 # to inspect the task
+str(getTaskData(task1)) # to access the underlying data
+getTaskFeatureNames(task1) # to inspect the feature names
+
+# Exploratory analysis
+ggpairs(Data) # This is not useful in my case... I've too many variables!!
+ggpairs(Data[,7:10]) # to get the plots for a subset
+
+# Learners
+lrns_mytask<-listLearners(task1) # to get the list of learners available for your task
+lrns_mytask[1:5, ]
+lrns_mytask[6:10, ]
+
+# Selected models:
+# classif.IBk       k-Nearest Neighbours         ibk # Non-prob
+# classif.J48         J48 Decision Trees         j48 # Non-prob
+# classif.multinom Multinomial Regression        multinom # Prob
+# classif.naiveBayes                  Naive Bayes     nbayes# Prob
+
+# Performance measures
+accTrainMean<-setAggregation(acc, train.mean) # to define performance measures for the train set
+accTrainMean
+mmceTrainMean<-setAggregation(mmce, train.mean)
+mmceTrainMean
+kappaTrainMean<-setAggregation(kappa, train.mean)
+kappaTrainMean
+multiclass.brierTrainMean<-setAggregation(multiclass.brier, train.mean)
+multiclass.brierTrainMean
+
+accTrainSD<-setAggregation(acc, train.sd) # to define performance measures for the train set
+accTrainSD
+mmceTrainSD<-setAggregation(mmce, train.sd)
+mmceTrainSD
+kappaTrainSD<-setAggregation(kappa, train.sd)
+kappaTrainSD
+multiclass.brierTrainSD<-setAggregation(multiclass.brier, train.sd)
+multiclass.brierTrainSD
+
+accTestSD<-setAggregation(acc, test.sd) # to define performance measures for the train set
+accTestSD
+mmceTestSD<-setAggregation(mmce, test.sd)
+mmceTestSD
+kappaTestSD<-setAggregation(kappa, test.sd)
+kappaTestSD
+multiclass.brierTestSD<-setAggregation(multiclass.brier, test.sd)
+multiclass.brierTestSD
+
+# Resampling strategies
+rdesc <- makeResampleDesc("Bootstrap", iters = 5, stratify = TRUE, predict = "both")
+
+
+###############################
+# ANALYSIS WITH ALL VARIABLES #
+###############################
+
+#################### k-NN ####################
+
+lrn.knn <- makeLearner("classif.IBk") # to make the learner
+getParamSet(lrn.knn) # to get a description of all possible settings (we won't change any of these...)
+mod.knn <- train(lrn.knn, task1) # to train the model
+mod.knn
+getLearnerModel(mod.knn) # to access the underlying model
+pred.knn <- predict(mod.knn, task1) # to predict the output of the model on training data
+head(as.data.frame(pred.knn)) # to get predicted vs. true values
+tail(as.data.frame(pred.knn))
+calculateConfusionMatrix(pred.knn) # to compute the confusion matrix
+performance(pred.knn, measures = list(acc, mmce, kappa)) # to estimate the performance measures
+
+#################### J48 ####################
+
+lrn.j48 <- makeLearner("classif.J48") # to make the learner
+getParamSet(lrn.j48) # to get a description of all possible settings (we won't change any of these...)
+mod.j48 <- train(lrn.j48, task1) # to train the model
+mod.j48
+getLearnerModel(mod.j48) # to access the underlying model
+pred.j48 <- predict(mod.j48, task1) # to predict the output of the model on training data
+head(as.data.frame(pred.j48)) # to get predicted vs. true values
+tail(as.data.frame(pred.j48))
+calculateConfusionMatrix(pred.j48) # to compute the confusion matrix
+performance(pred.j48, measures = list(acc, mmce, kappa)) # to estimate the performance measures
+
+#################### MULTINOMIAL REGRESSION ####################
+
+lrn.mr <- makeLearner("classif.multinom", predict.type = "prob") # to make the learner; predict.type set to "prob"!!
+getParamSet(lrn.mr) # to get a description of all possible settings (we won't change any of these...)
+mod.mr <- train(lrn.mr, task1) # to train the model
+mod.mr
+getLearnerModel(mod.mr) # to access the underlying model
+pred.mr <- predict(mod.mr, task1) # to predict the output of the model on training data
+head(as.data.frame(pred.mr)) # to get predicted vs. true values
+tail(as.data.frame(pred.mr))
+calculateConfusionMatrix(pred.mr) # to compute the confusion matrix
+performance(pred.mr, measures = list(acc, mmce, kappa, multiclass.brier)) # to estimate the performance measures
+
+#################### NAÏVE BAYES ####################
+
+lrn.nb <- makeLearner("classif.naiveBayes", predict.type = "prob") # to make the learner; predict.type set to "prob"!!
+getParamSet(lrn.nb) # to get a description of all possible settings (we won't change any of these...)
+mod.nb <- train(lrn.nb, task1) # to train the model
+mod.nb
+getLearnerModel(mod.nb) # to access the underlying model
+pred.nb <- predict(mod.nb, task1) # to predict the output of the model on training data
+head(as.data.frame(pred.nb)) # to get predicted vs. true values
+tail(as.data.frame(pred.nb))
+calculateConfusionMatrix(pred.nb) # to compute the confusion matrix
+performance(pred.nb, measures = list(acc, mmce, kappa, multiclass.brier)) # to estimate the performance measures
+
+#################### BENCHMARKING ####################
+learners1 <- list(lrn.knn, lrn.j48, lrn.mr, lrn.nb) # List of learners
+res1 <- benchmark(tasks = task1, learners = learners1, resampling = rdesc, measures = list(acc, mmce, kappa, accTestSD, mmceTestSD, kappaTestSD, accTrainMean, mmceTrainMean, kappaTrainMean, accTrainSD, mmceTrainSD, kappaTrainSD), keep.extract = TRUE, models = TRUE, show.info = TRUE)
+
+getBMRPerformances(res1, as.df = TRUE) # performance results
+getBMRAggrPerformances(res1, as.df = TRUE) # aggregated performance results
+
+# BOXPLOTS OF RESULTS
+
+ggplot(data=getBMRPerformances(res1, as.df = TRUE)[,1:6], aes(x=learner.id,y=acc)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for acc
+
+ggplot(data=getBMRPerformances(res1, as.df = TRUE)[,1:6], aes(x=learner.id,y=mmce)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for mmce
+
+ggplot(data=getBMRPerformances(res1, as.df = TRUE)[,1:6], aes(x=learner.id,y=kappa)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for kappa
+
+################################
+# UNIVARIATE FEATURE SELECTION #
+################################
+
+## FILTER WRAPPERS ## # To keep the 25% most important features
+lrn2.knn<- makeFilterWrapper(learner = lrn.knn, fw.method = "FSelectorRcpp_information.gain", fw.perc = 0.25) #k-NN
+lrn2.j48<- makeFilterWrapper(learner = lrn.j48, fw.method = "FSelectorRcpp_information.gain", fw.perc = 0.25) #J48
+lrn2.mr<- makeFilterWrapper(learner = lrn.mr, fw.method = "FSelectorRcpp_information.gain", fw.perc = 0.25) #multinomial regression
+lrn2.nb<- makeFilterWrapper(learner = lrn.nb, fw.method = "FSelectorRcpp_information.gain", fw.perc = 0.25) #Naive Bayes
+
+## BENCHMARKING ##
+
+learners2 <- list(lrn2.knn, lrn2.j48, lrn2.mr, lrn2.nb) # List of learners
+
+res2 <- benchmark(tasks = task1, learners = learners2, resampling = rdesc, measures = list(acc, mmce, kappa, accTestSD, mmceTestSD, kappaTestSD, accTrainMean, mmceTrainMean, kappaTrainMean, accTrainSD, mmceTrainSD, kappaTrainSD), keep.extract = TRUE, models = TRUE, show.info = TRUE)
+
+getBMRPerformances(res2, as.df = TRUE) # performance results
+getBMRAggrPerformances(res2, as.df = TRUE) # aggregated performance results
+
+getBMRModels(res2) # to see al the models
+
+sfeats.knn <- sapply(getBMRModels(res2)[["lymphography"]][["classif.IBk.filtered"]], getFilteredFeatures) # to see the list of features selected in k-NN
+sfeats.knn
+
+sfeats.j48 <- sapply(getBMRModels(res2)[["lymphography"]][["classif.J48.filtered"]], getFilteredFeatures) # to see the list of features selected in J48
+sfeats.j48
+
+sfeats.mr <- sapply(getBMRModels(res2)[["lymphography"]][["classif.multinom.filtered"]], getFilteredFeatures) # to see the list of features selected in multinomial regression
+sfeats.mr
+
+sfeats.gp <- sapply(getBMRModels(res2)[["lymphography"]][["classif.naiveBayes.filtered"]], getFilteredFeatures) # to see the list of features selected in Naive Bayes
+sfeats.gp
+
+# BOXPLOTS OF RESULTS
+
+ggplot(data=getBMRPerformances(res2, as.df = TRUE)[,1:6], aes(x=learner.id,y=acc)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for acc
+
+ggplot(data=getBMRPerformances(res2, as.df = TRUE)[,1:6], aes(x=learner.id,y=mmce)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for mmce
+
+ggplot(data=getBMRPerformances(res2, as.df = TRUE)[,1:6], aes(x=learner.id,y=kappa)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for kappa
+
+
+#########################################
+# MULTIVARIATE FEATURE SUBSET SELECTION #
+#########################################
+
+## FSS STRATEGY AND WRAPPERS###
+fss.ctrl <- makeFeatSelControlRandom(maxit = 20L)
+
+lrn3.knn <- makeFeatSelWrapper(lrn.knn, resampling =rdesc, control = fss.ctrl, measures = list(acc, mmce, kappa, accTestSD, mmceTestSD, kappaTestSD, accTrainMean, mmceTrainMean, kappaTrainMean, accTrainSD, mmceTrainSD, kappaTrainSD), show.info = TRUE) # k-NN
+
+lrn3.j48 <- makeFeatSelWrapper(lrn.j48, resampling =rdesc, control = fss.ctrl, measures = list(acc, mmce, kappa, accTestSD, mmceTestSD, kappaTestSD, accTrainMean, mmceTrainMean, kappaTrainMean, accTrainSD, mmceTrainSD, kappaTrainSD), show.info = TRUE) # J48
+
+lrn3.mr <- makeFeatSelWrapper(lrn.mr, resampling =rdesc, control = fss.ctrl, measures = list(acc, mmce, kappa, accTestSD, mmceTestSD, kappaTestSD, accTrainMean, mmceTrainMean, kappaTrainMean, accTrainSD, mmceTrainSD, kappaTrainSD), show.info = TRUE) # multinomial regression
+
+lrn3.nb <- makeFeatSelWrapper(lrn.nb, resampling =rdesc, control = fss.ctrl, measures = list(acc, mmce, kappa, accTestSD, mmceTestSD, kappaTestSD, accTrainMean, mmceTrainMean, kappaTrainMean, accTrainSD, mmceTrainSD, kappaTrainSD), show.info = TRUE) # Naive Bayes
+
+## BENCHMARKING ##
+learners3 <- list(lrn3.knn, lrn3.j48, lrn3.mr, lrn3.nb) # list of learners 
+
+res3 <- benchmark(tasks = task1, learners = learners3, resampling = rdesc, measures = list(acc, mmce, kappa, accTestSD, mmceTestSD, kappaTestSD, accTrainMean, mmceTrainMean, kappaTrainMean, accTrainSD, mmceTrainSD, kappaTrainSD), keep.extract = TRUE, models = TRUE, show.info = TRUE)
+
+getBMRPerformances(res3, as.df = TRUE) # performance results
+getBMRAggrPerformances(res3, as.df = TRUE) # aggregated performance results
+
+feats.knn <- getBMRFeatSelResults(res3, learner.id = "classif.IBk.featsel", drop = TRUE)
+feats.knn[[1]]$x # selected features in k-NN
+
+feats.j48 <- getBMRFeatSelResults(res3, learner.id = "classif.J48.featsel", drop = TRUE)
+feats.j48[[1]]$x  # selected features in J48
+
+feats.mr <- getBMRFeatSelResults(res3, learner.id = "classif.multinom.featsel", drop = TRUE)
+feats.mr[[1]]$x # selected features in multinomial regression
+
+feats.nb <- getBMRFeatSelResults(res3, learner.id = "classif.naiveBayes.featsel", drop = TRUE)
+feats.nb[[1]]$x # selected features in naive Bayes
+
+# BOXPLOTS OF RESULTS
+
+ggplot(data=getBMRPerformances(res3, as.df = TRUE)[,1:6], aes(x=learner.id,y=acc)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for acc
+
+ggplot(data=getBMRPerformances(res3, as.df = TRUE)[,1:6], aes(x=learner.id,y=mmce)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for mmce
+
+ggplot(data=getBMRPerformances(res3, as.df = TRUE)[,1:6], aes(x=learner.id,y=kappa)) + geom_boxplot() + aes(fill = learner.id) + theme(legend.position="none") + theme_classic() # boxplot for kappa
